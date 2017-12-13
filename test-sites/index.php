@@ -7,21 +7,22 @@
 $xml = new DOMDocument;
 $xml->preserveWhiteSpace = false;
 
-$xml->Load('simple_test.xml');
+$xml->load('simple_test.xml');
 
 if (isset($_REQUEST["query"])) {
   $xpath = new DOMXPath($xml);
 
-  $query = $_REQUEST["query"];
+  $query = trim($_REQUEST["query"]);
+  if (!empty($query)) {
+    $request = "boolean(//data/users/user[text() = '" . $query . "'])";
 
-  $request = "boolean('/data/users/user/" . $query . "')";
-
-  $result_xpath = $xpath->evaluate($request);
-  if ($result_xpath === NULL  || $result_xpath == 0){
-    echo "User '" . $query, "' does not exists.", "<br/>";
+    $result_xpath = $xpath->evaluate($request);
+    if ($result_xpath === NULL  || $result_xpath == 0){
+      echo "User '" . $query, "' does not exists.", "<br/>";
+    }
+    else {
+      echo "User '" . $query, "' exists.", "<br/>";
+    } 
   }
-  else {
-    echo "User '" . $query, "' exists.", "<br/>";
-  } 
 }
 ?>
