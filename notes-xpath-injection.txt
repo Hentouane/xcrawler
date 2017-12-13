@@ -1,0 +1,3 @@
+count(/*)
+string-length(name(/*[1])=4
+substring(name(/*[1]),1,2)='da'
