@@ -7,7 +7,7 @@
 $xml = new DOMDocument;
 $xml->preserveWhiteSpace = false;
 
-$xml->load('simple_test.xml');
+$xml->load('./tests-xml/simple_test.xml');
 
 if (isset($_REQUEST["query"])) {
   $xpath = new DOMXPath($xml);
