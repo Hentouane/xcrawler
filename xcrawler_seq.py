@@ -1,4 +1,5 @@
-from xcrawler import XCrawler
+import sys
+import xcrawler
 
 
 def crawlText(xcrawler, path, node):
@@ -38,5 +39,8 @@ def run(xcrawler):
     print xcrawler.xml.toprettyxml()
 
 if __name__ == '__main__':
-    xcrawler = XCrawler()
-    run(xcrawler)
+    if len(sys.argv) < 7:
+        xcrawler.usage("XCrawler_seq")
+    else:
+        xcrawler = xcrawler.XCrawler()
+        run(xcrawler)
