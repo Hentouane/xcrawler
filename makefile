@@ -10,3 +10,7 @@ start_php:
 test_seq: start_php
 	$(CC) xcrawler_seq.py $(ARGS) > test_seq.res
 	ps -f | grep [p]hp | awk '{print $$2}' | xargs kill -9
+
+clean:
+	rm xcrawler.pyc
+	rm test_*.res
