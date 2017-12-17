@@ -1,11 +1,10 @@
 from Queue import Queue
-from threading import Thread
-from xcrawler import XCrawler
-
+import sys
+from threading import Thread, Lock
+import xcrawler
 
 class Worker(Thread):
     """Thread executing tasks from a given tasks queue"""
-
     def __init__(self, tasks):
         Thread.__init__(self)
         self.tasks = tasks
@@ -15,19 +14,15 @@ class Worker(Thread):
     def run(self):
         while True:
             func, args, kargs = self.tasks.get()
-            try:
-                func(*args, **kargs)
-            except Exception, e:
-                print e
-            finally:
-                self.tasks.task_done()
+            func(*args, **kargs)
+            self.tasks.task_done()
 
 
 class ThreadPool:
     """Pool of threads consuming tasks from a queue"""
 
     def __init__(self, num_threads):
-        self.tasks = Queue(num_threads)
+        self.tasks = Queue()
         for _ in range(num_threads): Worker(self.tasks)
 
     def add_task(self, func, *args, **kargs):
@@ -39,13 +34,11 @@ class ThreadPool:
         self.tasks.join()
 
 
-NBT = 4
-
-
 def crawlText(xcrawler, path, node):
     text_length = xcrawler.find_length(path + "/text()")
     if text_length > 0:
         text = xcrawler.find_name(path + "/text()", text_length)
+
         text_node = xcrawler.xml.createTextNode(text)
         node.appendChild(text_node)
 
@@ -55,21 +48,23 @@ def crawlText(xcrawler, path, node):
 def crawlNode(xcrawler, path, pool, parent_node=None):
     length = xcrawler.find_length("name(" + path + ")")
     name = xcrawler.find_name("name(" + path + ")", length)
+
     node = xcrawler.xml.createElement(name)
     node = crawlText(xcrawler, path, node)
 
     if parent_node is None:
         xcrawler.xml.appendChild(node)
     else:
-        parent_node.appendChild(node)
+        xcrawler.mutex.acquire()
+        try:
+            parent_node.appendChild(node)
+        finally:
+            xcrawler.mutex.release()
 
     if xcrawler.count_node(path + "/*") > 0:
         pool.add_task(crawlXml, xcrawler, path + "/*", pool, node)
 
     return node
-
-
-#def crawlXmlRange(xcrawler, base_path, parent_node, range):
 
 
 def crawlXml(xcrawler, base_path, pool, parent_node=None):
@@ -84,15 +79,19 @@ def crawlXml(xcrawler, base_path, pool, parent_node=None):
 
 
 def run(xcrawler):
-    pool = ThreadPool(20)
+    pool = ThreadPool(xcrawler.nb_thread)
 
-    ''' On debute avec le noeud initial/root '''
-
+    """ On debute avec le noeud initial/root """
     crawlNode(xcrawler, '/*[1]', pool)
+
     pool.wait_completion()
     print xcrawler.xml.toprettyxml()
 
 
 if __name__ == '__main__':
-    xcrawler = XCrawler()
-    run(xcrawler)
+    if len(sys.argv) < 9:
+        xcrawler.usage("XCrawler_par")
+    else:
+        xcrawler = xcrawler.XCrawler()
+        xcrawler.mutex = Lock()
+        run(xcrawler)
