@@ -5,11 +5,19 @@ ARGS=-url "http://$(ADDR)/tests/index.php" -query "query" -v "hentouane" -nbt 4
 
 RES_SEQ=test_seq.res
 RES_PAR=test_par.res
+RES_MES=mesures.res
 
-default: test_par#test_seq
+default: tests
 
 start_php:
 	(php -S $(ADDR) &)
+
+kill_php:
+	ps -f | grep [p]hp | awk '{print $$2}' | xargs kill -9
+
+mesures: start_php
+	$(CC) xcrawler_benchmark.py > $(RES_MES)
+	$(MAKE) kill_php
 
 test_par: start_php
 	echo "**** $@: debut ****" > $(RES_PAR)
@@ -29,10 +37,9 @@ test_seq: start_php
 	echo "**** $@: fin ****" >> $(RES_SEQ)
 	date >> $(RES_SEQ)
 
-tests: start_php test_seq test_par	
-	ps -f | grep [p]hp | awk '{print $$2}' | xargs kill -9
+tests: start_php test_seq test_par kill_php	
+	
 
 clean:
-	rm *.pyc
 	rm *.res
 	rm *.class
