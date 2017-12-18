@@ -1,7 +1,9 @@
 import sys
 import xcrawler
 
+""" Implementation sequentielle de XCrawler """
 
+""" Explore le texte d'un noeud """
 def crawlText(xcrawler, path, node):
     text_length = xcrawler.find_length(path + "/text()")
     if text_length > 0:
@@ -12,6 +14,7 @@ def crawlText(xcrawler, path, node):
     return node
 
 
+""" Fonction principal d'exploration. S'appelle recursivement pour chaque enfant """
 def crawlXml(xcrawler, base_path, parent_node=None):
     nodeIndex = 1
     path = base_path

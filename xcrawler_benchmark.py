@@ -5,11 +5,13 @@ from xcrawler import XCrawler
 import xcrawler_par
 import xcrawler_seq
 
+''' Script utilise pour prendre les mesures d'execution du XCrawler '''
+
 URL = "http://localhost:8080/tests/test-{}.php"
 QUERY = "query"
 SURE_VALUE = "0"
-TESTS = [8, 16, 32]
-NBTS = [1, 2, 4, 8]
+TESTS = [8,16,32]
+NBTS = [1,2,4,8]
 
 
 def block_print():

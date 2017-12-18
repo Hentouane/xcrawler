@@ -3,8 +3,11 @@ import sys
 from threading import Thread, Lock
 import xcrawler
 
+""" Implementation parallele du XCrawler """
+
+
+""" Classe Travailleur """
 class Worker(Thread):
-    """Thread executing tasks from a given tasks queue"""
     def __init__(self, tasks):
         Thread.__init__(self)
         self.tasks = tasks
@@ -18,22 +21,20 @@ class Worker(Thread):
             self.tasks.task_done()
 
 
+""" Classe sac de taches """
 class ThreadPool:
-    """Pool of threads consuming tasks from a queue"""
-
     def __init__(self, num_threads):
         self.tasks = Queue()
         for _ in range(num_threads): Worker(self.tasks)
 
     def add_task(self, func, *args, **kargs):
-        """Add a task to the queue"""
         self.tasks.put((func, args, kargs))
 
     def wait_completion(self):
-        """Wait for completion of all the tasks in the queue"""
         self.tasks.join()
 
 
+""" Explore le texte d'un noeud """
 def crawlText(xcrawler, path, node):
     text_length = xcrawler.find_length(path + "/text()")
     if text_length > 0:
@@ -44,7 +45,7 @@ def crawlText(xcrawler, path, node):
 
     return node
 
-
+""" Explore un noeud et son nom. Cree une tache si le nom a des enfants """
 def crawlNode(xcrawler, path, pool, parent_node=None):
     length = xcrawler.find_length("name(" + path + ")")
     name = xcrawler.find_name("name(" + path + ")", length)
@@ -67,6 +68,7 @@ def crawlNode(xcrawler, path, pool, parent_node=None):
     return node
 
 
+""" Fonction principale creant des taches pour chacun des enfants du noeud donne """
 def crawlXml(xcrawler, base_path, pool, parent_node=None):
     nodeIndex = 1
     path = base_path

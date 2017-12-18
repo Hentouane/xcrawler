@@ -5,9 +5,10 @@ import urllib
 import urllib2
 from xml.dom.minidom import *
 
+""" Classe principale XCrawler """
 
 class XCrawler(object):
-    MAX_RETRY = 4
+    MAX_RETRY = 4 #Nombre maximal que l'on reessait la connexion en cas d'erreur
 
     strTrue = " and '1'='1"
     strFalse = " and '1'='0"
@@ -54,6 +55,7 @@ class XCrawler(object):
                     break
         return name
 
+    """ Fonction de communication avec l'application web par requete GET """
     def get_request(self, payload):
         retry = 0
         html = ""
