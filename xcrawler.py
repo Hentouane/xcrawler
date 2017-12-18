@@ -22,13 +22,13 @@ class XCrawler(object):
         self.url = args.url
         self.xml = Document()
         self.mutex = None
-        self.nb_thread = int(args.nbt)
+        self.nb_thread = int(args.nbt) if args.nbt is not None else None
         self.query = args.query
         self.sure_value = args.v
 
     def count_node(self, path):
         count = 0
-        for i in range(0, 10000):
+        for i in range(0, 2000):
             payload = self.make_payload(self.strCount.format(path, i))
             if self.get_request(payload):
                 count = i
